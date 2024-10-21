@@ -38,20 +38,23 @@ class VerifyPhoneNumberTest extends TestCase
 
         /** @var V2&MockObject $v2 */
         $v2 = $this->createMock(V2::class);
+        /** @psalm-suppress MixedMethodCall */
         $v2->expects($this->once())
-            ->method("__call")
-            ->with("phoneNumbers", [$phoneNumber])
+            ->method("phoneNumbers")
+            ->with($phoneNumber)
             ->willReturn($context);
 
         /** @var Lookups&MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
+        /** @psalm-suppress MixedMethodCall */
         $lookups->expects($this->once())
-            ->method("__get")
-            ->with("v2")
+            ->method("__call")
+            ->with("getV2", [])
             ->willReturn($v2);
 
         /** @var Client&MockObject $client */
         $client = $this->createMock(Client::class);
+        /** @psalm-suppress MixedMethodCall */
         $client->expects($this->once())
             ->method("__get")
             ->with("lookups")
@@ -78,20 +81,23 @@ class VerifyPhoneNumberTest extends TestCase
 
         /** @var V2&MockObject $v2 */
         $v2 = $this->createMock(V2::class);
+        /** @psalm-suppress MixedMethodCall */
         $v2->expects($this->once())
-            ->method("__call")
-            ->with("phoneNumbers", [$phoneNumber])
+            ->method("phoneNumbers")
+            ->with($phoneNumber)
             ->willReturn($context);
 
         /** @var Lookups&MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
+        /** @psalm-suppress MixedMethodCall */
         $lookups->expects($this->once())
-            ->method("__get")
-            ->with("v2")
+            ->method("__call")
+            ->with("getV2", [])
             ->willReturn($v2);
 
         /** @var Client&MockObject $client */
         $client = $this->createMock(Client::class);
+        /** @psalm-suppress MixedMethodCall */
         $client->expects($this->once())
             ->method("__get")
             ->with("lookups")
