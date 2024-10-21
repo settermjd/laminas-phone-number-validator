@@ -7,7 +7,6 @@ namespace Settermjd\Validator;
 use Laminas\Validator\AbstractValidator;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
-use Twilio\Rest\Lookups;
 
 final class VerifyPhoneNumber extends AbstractValidator
 {
@@ -33,9 +32,8 @@ final class VerifyPhoneNumber extends AbstractValidator
         $this->setValue($value);
 
         try {
-            $lookups = $this->twilio->__get("lookups");
-            /** @var Lookups\V2 $v2 */
-            $v2           = $lookups->__call("getV2", []);
+            $lookups      = $this->twilio->lookups;
+            $v2           = $lookups->v2;
             $phoneNumbers = $v2->phoneNumbers((string) $value);
             $phoneNumber  = $phoneNumbers->fetch();
         } catch (TwilioException $e) {

@@ -47,8 +47,8 @@ class VerifyPhoneNumberTest extends TestCase
         /** @var MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
         $lookups->expects($this->once())
-            ->method("__call")
-            ->with("getV2", [])
+            ->method("__get")
+            ->with("v2")
             ->willReturn($v2);
 
         /** @var MockObject $client */
@@ -88,8 +88,8 @@ class VerifyPhoneNumberTest extends TestCase
         /** @var MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
         $lookups->expects($this->once())
-            ->method("__call")
-            ->with("getV2", [])
+            ->method("__get")
+            ->with("v2")
             ->willReturn($v2);
 
         /** @var MockObject $client */
