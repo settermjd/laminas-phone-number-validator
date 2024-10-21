@@ -1,5 +1,7 @@
 # Phone Number Validator that uses Twilio's Lookup (V2) API
 
+![GitHub Actions Workflow Status](https://github.com/settermjd/laminas-phone-number-validator/actions/workflows/php.yml/badge.svg)
+
 This is a custom laminas-validator class that checks if a phone number is valid by using Twilio's Lookup API.
 
 ## Overview
