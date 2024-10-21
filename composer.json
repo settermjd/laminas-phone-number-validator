@@ -33,6 +33,7 @@
   "scripts": {
     "check": [
       "@cs-check",
+      "@static-analysis",
       "@test"
     ],
     "cs-check": "phpcs",
