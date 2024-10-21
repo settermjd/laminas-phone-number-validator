@@ -113,7 +113,7 @@ If the project was useful, and you want to say thank you and/or support its acti
 [git-url]: https://git-scm.com/downloads
 [twilio-console-url]: https://console.twilio.com/
 [twilio-referral-url]: http://www.twilio.com/referral/QlBtVJ
-[github-issues-url]: https://github.com/settermjd/laminas-twilio-phone-number-validator/issues
-[github-pr-url]: https://github.com/settermjd/laminas-twilio-phone-number-validator/pulls
+[github-issues-url]: https://github.com/settermjd/laminas-phone-number-validator/issues
+[github-pr-url]: https://github.com/settermjd/laminas-phone-number-validator/pulls
 [laminas-inputfilter-url]: https://docs.laminas.dev/laminas-inputfilter/
 [phpdotenv-url]: https://github.com/vlucas/phpdotenv
