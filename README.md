@@ -13,8 +13,8 @@ To use the application, you'll need the following:
 - A Twilio account (free or paid).
   [Create an account][twilio-referral-url] if you don't already have one.
 - PHP 8.3
-- Composer installed globally
-- Git
+- [Composer][composer-url] installed globally
+- [Git][git-url]
 
 ## Getting Started
 
@@ -93,7 +93,7 @@ To retrieve these, open [the Twilio Console][twilio-console-url] in your browser
 ![The Account Info panel of the Twilio Console, showing a user's Account SID, Auth Token, and phone number, where the Account SID and phone number have been partially or completely redacted.](./docs/images/twilio-console-account-info-panel.png)
 
 > [!CAUTION]
-> Use a package such as [PHP Dotenv][phpdotenv-url] to keep these out of code and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
+> Use a package such as [PHP Dotenv][phpdotenv-url] to keep credentials, such as the Twilio Account SID and Auth Token out of code, and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
 
 ## Contributing
 
@@ -109,6 +109,8 @@ If the project was useful, and you want to say thank you and/or support its acti
 - Add a GitHub Star to the project
 - Write an interesting article about the project wherever you blog
 
+[composer-url]: https://getcomposer.org
+[git-url]: https://git-scm.com/downloads
 [twilio-console-url]: https://console.twilio.com/
 [twilio-referral-url]: http://www.twilio.com/referral/QlBtVJ
 [github-issues-url]: https://github.com/settermjd/laminas-twilio-phone-number-validator/issues
