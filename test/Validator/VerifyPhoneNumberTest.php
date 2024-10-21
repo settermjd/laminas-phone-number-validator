@@ -20,6 +20,27 @@ use function sprintf;
 
 class VerifyPhoneNumberTest extends TestCase
 {
+    #[TestWith(['+61000a00000'])]
+    #[TestWith(['+61000@00000'])]
+    #[TestWith(['61000000000'])]
+    #[TestWith(['-61000000000'])]
+    #[TestWith(['61'])]
+    public function testPhoneNumbersMustPassE164Regex(string $invalidPhoneNumber): void
+    {
+        $validator = new VerifyPhoneNumber($this->createMock(Client::class));
+
+        $this->assertFalse($validator->isValid($invalidPhoneNumber));
+        $this->assertSame(
+            [
+                "msgInvalidPhoneNumber" => sprintf(
+                    "'%s' is not a valid phone number",
+                    $invalidPhoneNumber
+                ),
+            ],
+            $validator->getMessages()
+        );
+    }
+
     #[TestWith(['+61000000000', true])]
     #[TestWith(['+61', false])]
     public function testValidPhoneNumbersValidateSuccessfully(string $phoneNumber, bool $phoneNumberIsValid): void
@@ -47,8 +68,8 @@ class VerifyPhoneNumberTest extends TestCase
         /** @var MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
         $lookups->expects($this->once())
-            ->method("__call")
-            ->with("getV2", [])
+            ->method("__get")
+            ->with("v2")
             ->willReturn($v2);
 
         /** @var MockObject $client */
@@ -88,8 +109,8 @@ class VerifyPhoneNumberTest extends TestCase
         /** @var MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
         $lookups->expects($this->once())
-            ->method("__call")
-            ->with("getV2", [])
+            ->method("__get")
+            ->with("v2")
             ->willReturn($v2);
 
         /** @var MockObject $client */
