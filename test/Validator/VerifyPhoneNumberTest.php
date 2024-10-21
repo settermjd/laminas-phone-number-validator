@@ -1,0 +1,106 @@
+<?php
+
+declare(strict_types=1);
+
+namespace SettermjdTest\Validator;
+
+use PHPUnit\Framework\Attributes\TestWith;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Settermjd\Validator\VerifyPhoneNumber;
+use Twilio\Exceptions\TwilioException;
+use Twilio\Rest\Client;
+use Twilio\Rest\Lookups;
+use Twilio\Rest\Lookups\V2;
+use Twilio\Rest\Lookups\V2\PhoneNumberContext;
+use Twilio\Rest\Lookups\V2\PhoneNumberInstance;
+
+use function sprintf;
+
+class VerifyPhoneNumberTest extends TestCase
+{
+    #[TestWith(['+61000000000', true])]
+    #[TestWith(['+61', false])]
+    public function testValidPhoneNumbersValidateSuccessfully(string $phoneNumber, bool $phoneNumberIsValid): void
+    {
+        /** @var PhoneNumberInstance&MockObject $phoneNumberInstance */
+        $phoneNumberInstance = $this->createMock(PhoneNumberInstance::class);
+        $phoneNumberInstance->expects($this->once())
+            ->method("__get")
+            ->with("valid")
+            ->willReturn($phoneNumberIsValid);
+
+        /** @var PhoneNumberContext&MockObject $context */
+        $context = $this->createMock(PhoneNumberContext::class);
+        $context->expects($this->once())
+            ->method("fetch")
+            ->willReturn($phoneNumberInstance);
+
+        /** @var V2&MockObject $v2 */
+        $v2 = $this->createMock(V2::class);
+        $v2->expects($this->once())
+            ->method("__call")
+            ->with("phoneNumbers", [$phoneNumber])
+            ->willReturn($context);
+
+        /** @var Lookups&MockObject $lookups */
+        $lookups = $this->createMock(Lookups::class);
+        $lookups->expects($this->once())
+            ->method("__get")
+            ->with("v2")
+            ->willReturn($v2);
+
+        /** @var Client&MockObject $client */
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method("__get")
+            ->with("lookups")
+            ->willReturn($lookups);
+
+        $validator = new VerifyPhoneNumber($client);
+
+        $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
+        if (! $phoneNumberIsValid) {
+            $message = sprintf("'%s' is not a valid phone number", $phoneNumber);
+            $this->assertSame(["msgInvalidPhoneNumber" => $message], $validator->getMessages());
+        }
+    }
+
+    public function testCanHandleExceptionsWhileQueryingTheLookupAPI(): void
+    {
+        $phoneNumber = '+61000000000';
+
+        /** @var PhoneNumberContext&MockObject $context */
+        $context = $this->createMock(PhoneNumberContext::class);
+        $context->expects($this->once())
+            ->method("fetch")
+            ->willThrowException(new TwilioException("Unable to fetch record"));
+
+        /** @var V2&MockObject $v2 */
+        $v2 = $this->createMock(V2::class);
+        $v2->expects($this->once())
+            ->method("__call")
+            ->with("phoneNumbers", [$phoneNumber])
+            ->willReturn($context);
+
+        /** @var Lookups&MockObject $lookups */
+        $lookups = $this->createMock(Lookups::class);
+        $lookups->expects($this->once())
+            ->method("__get")
+            ->with("v2")
+            ->willReturn($v2);
+
+        /** @var Client&MockObject $client */
+        $client = $this->createMock(Client::class);
+        $client->expects($this->once())
+            ->method("__get")
+            ->with("lookups")
+            ->willReturn($lookups);
+
+        $validator = new VerifyPhoneNumber($client);
+
+        $this->assertFalse($validator->isValid($phoneNumber));
+        $message = sprintf("There was a network error while checking if '%s' is valid", $phoneNumber);
+        $this->assertSame(["msgNetworkLookupFailure" => $message], $validator->getMessages());
+    }
+}
