@@ -38,5 +38,11 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - uses: articulate/actions-markdownlint@v1
+        with:
+          config: .markdownlint.yaml
+          files: 'README.md'
+          ignore: vendor
+
       - name: Run the test suite
         run: composer check
