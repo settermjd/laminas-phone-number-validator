@@ -15,6 +15,7 @@ use Twilio\Rest\Lookups\V2;
 use Twilio\Rest\Lookups\V2\PhoneNumberContext;
 use Twilio\Rest\Lookups\V2\PhoneNumberInstance;
 
+use function assert;
 use function sprintf;
 
 class VerifyPhoneNumberTest extends TestCase
@@ -23,43 +24,41 @@ class VerifyPhoneNumberTest extends TestCase
     #[TestWith(['+61', false])]
     public function testValidPhoneNumbersValidateSuccessfully(string $phoneNumber, bool $phoneNumberIsValid): void
     {
-        /** @var PhoneNumberInstance&MockObject $phoneNumberInstance */
+        /** @var MockObject $phoneNumberInstance */
         $phoneNumberInstance = $this->createMock(PhoneNumberInstance::class);
         $phoneNumberInstance->expects($this->once())
             ->method("__get")
             ->with("valid")
             ->willReturn($phoneNumberIsValid);
 
-        /** @var PhoneNumberContext&MockObject $context */
+        /** @var MockObject $context */
         $context = $this->createMock(PhoneNumberContext::class);
         $context->expects($this->once())
             ->method("fetch")
             ->willReturn($phoneNumberInstance);
 
-        /** @var V2&MockObject $v2 */
+        /** @var MockObject $v2 */
         $v2 = $this->createMock(V2::class);
-        /** @psalm-suppress MixedMethodCall */
         $v2->expects($this->once())
-            ->method("phoneNumbers")
-            ->with($phoneNumber)
+            ->method("__call")
+            ->with("phoneNumbers", [$phoneNumber])
             ->willReturn($context);
 
-        /** @var Lookups&MockObject $lookups */
+        /** @var MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
-        /** @psalm-suppress MixedMethodCall */
         $lookups->expects($this->once())
             ->method("__call")
             ->with("getV2", [])
             ->willReturn($v2);
 
-        /** @var Client&MockObject $client */
+        /** @var MockObject $client */
         $client = $this->createMock(Client::class);
-        /** @psalm-suppress MixedMethodCall */
         $client->expects($this->once())
             ->method("__get")
             ->with("lookups")
             ->willReturn($lookups);
 
+        assert($client instanceof Client);
         $validator = new VerifyPhoneNumber($client);
 
         $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
@@ -73,36 +72,34 @@ class VerifyPhoneNumberTest extends TestCase
     {
         $phoneNumber = '+61000000000';
 
-        /** @var PhoneNumberContext&MockObject $context */
+        /** @var MockObject $context */
         $context = $this->createMock(PhoneNumberContext::class);
         $context->expects($this->once())
             ->method("fetch")
             ->willThrowException(new TwilioException("Unable to fetch record"));
 
-        /** @var V2&MockObject $v2 */
+        /** @var MockObject $v2 */
         $v2 = $this->createMock(V2::class);
-        /** @psalm-suppress MixedMethodCall */
         $v2->expects($this->once())
-            ->method("phoneNumbers")
-            ->with($phoneNumber)
+            ->method("__call")
+            ->with("phoneNumbers", [$phoneNumber])
             ->willReturn($context);
 
-        /** @var Lookups&MockObject $lookups */
+        /** @var MockObject $lookups */
         $lookups = $this->createMock(Lookups::class);
-        /** @psalm-suppress MixedMethodCall */
         $lookups->expects($this->once())
             ->method("__call")
             ->with("getV2", [])
             ->willReturn($v2);
 
-        /** @var Client&MockObject $client */
+        /** @var MockObject $client */
         $client = $this->createMock(Client::class);
-        /** @psalm-suppress MixedMethodCall */
         $client->expects($this->once())
             ->method("__get")
             ->with("lookups")
             ->willReturn($lookups);
 
+        assert($client instanceof Client);
         $validator = new VerifyPhoneNumber($client);
 
         $this->assertFalse($validator->isValid($phoneNumber));

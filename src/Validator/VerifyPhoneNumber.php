@@ -35,11 +35,9 @@ final class VerifyPhoneNumber extends AbstractValidator
         try {
             $lookups = $this->twilio->__get("lookups");
             /** @var Lookups\V2 $v2 */
-            $v2 = $lookups->__call("getV2", []);
-
+            $v2           = $lookups->__call("getV2", []);
             $phoneNumbers = $v2->phoneNumbers((string) $value);
-
-            $phoneNumber = $phoneNumbers->fetch();
+            $phoneNumber  = $phoneNumbers->fetch();
         } catch (TwilioException $e) {
             $this->error(self::MSG_NETWORK_LOOKUP_FAILURE);
             return false;
