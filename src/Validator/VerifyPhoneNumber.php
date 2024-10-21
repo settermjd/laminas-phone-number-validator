@@ -8,6 +8,8 @@ use Laminas\Validator\AbstractValidator;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
+use function preg_match;
+
 final class VerifyPhoneNumber extends AbstractValidator
 {
     public const string MSG_INVALID_PHONE_NUMBER   = 'msgInvalidPhoneNumber';
@@ -24,12 +26,25 @@ final class VerifyPhoneNumber extends AbstractValidator
     }
 
     /**
+     * The function checks if the supplied value is valid phone number
+     *
+     * It first checks the number against Twilio's E.164 regex, and if that passes,
+     * it makes a request to Twilio's Lookup API (V2).
+     *
+     * @link https://www.twilio.com/docs/glossary/what-e164
+     * @link https://www.twilio.com/docs/lookup/v2-api
+     *
      * @param mixed $value
      * @return bool
      */
     public function isValid($value)
     {
         $this->setValue($value);
+
+        if (preg_match("/^\+[1-9]\d{1,14}$/", (string) $value) !== 1) {
+            $this->error(self::MSG_INVALID_PHONE_NUMBER);
+            return false;
+        }
 
         try {
             $lookups      = $this->twilio->lookups;
