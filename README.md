@@ -20,6 +20,8 @@ To use the application, you'll need the following:
 
 ## Getting Started
 
+### Add the Package as a Project Dependency
+
 To use the package in your project, first, either add it as a required package in _composer.json_'s `require` attribute.
 
 ```json
@@ -33,6 +35,8 @@ Or, use `composer require` to add it:
 ```bash
 composer require settermjd/laminas-twilio-phone-number-validator
 ```
+
+### How to Use the Validator
 
 Then, you can either use it directly, as in the following example, to validate a phone number.
 
@@ -97,6 +101,32 @@ To retrieve these, open [the Twilio Console][twilio-console-url] in your browser
 > [!CAUTION]
 > Use a package such as [PHP Dotenv][phpdotenv-url] to keep credentials, such as the Twilio Account SID and Auth Token out of code, and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
 
+#### Add Caching Support
+
+The validator is [PSR-16][psr16-url]-compliant.
+So, if you want to further enhance performance, when initialising a `VerifyPhoneNumber` object, provide an object that implements [CacheInterface][cacheinterface-url] as the third argument; the example below uses [laminas-cache][laminascache-psr16-url].
+
+```php
+use Laminas\Cache\Psr\SimpleCache\SimpleCacheDecorator;
+use Laminas\Cache\Service\StorageAdapterFactoryInterface;
+use Psr\Container\ContainerInterface;
+use Settermjd\Validator\VerifyPhoneNumber;
+use Twilio\Rest\Client;
+
+/** @var ContainerInterface $container */
+$container = null; // can be any configured PSR-11 container
+
+$storageFactory = $container->get(StorageAdapterFactoryInterface::class);
+$storage = $storageFactory->create('apc');
+
+$validator = new VerifyPhoneNumber(
+    new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`), 
+    new SimpleCacheDecorator($storage)
+);
+```
+
+If you're not sure which PSR-16 implementation to use, [check out the full list of providers on Packagist][simplecache-implementation-url].
+
 ## Contributing
 
 If you want to contribute to the project, whether you have found issues with it or just want to improve it, here's how:
@@ -111,11 +141,15 @@ If the project was useful, and you want to say thank you and/or support its acti
 - Add a GitHub Star to the project
 - Write an interesting article about the project wherever you blog
 
+[cacheinterface-url]: https://www.php-fig.org/psr/psr-16/#21-cacheinterface
 [composer-url]: https://getcomposer.org
 [git-url]: https://git-scm.com/downloads
 [twilio-console-url]: https://console.twilio.com/
 [twilio-referral-url]: http://www.twilio.com/referral/QlBtVJ
 [github-issues-url]: https://github.com/settermjd/laminas-phone-number-validator/issues
 [github-pr-url]: https://github.com/settermjd/laminas-phone-number-validator/pulls
+[laminascache-psr16-url]: https://docs.laminas.dev/laminas-cache/v4/psr16/
 [laminas-inputfilter-url]: https://docs.laminas.dev/laminas-inputfilter/
 [phpdotenv-url]: https://github.com/vlucas/phpdotenv
+[psr16-url]: https://www.php-fig.org/psr/psr-16/
+[simplecache-implementation-url]: https://packagist.org/providers/psr/simple-cache-implementation

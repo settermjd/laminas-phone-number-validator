@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Settermjd\Validator;
 
-use Laminas\Cache\Exception\ExceptionInterface;
-use Laminas\Cache\Storage\StorageInterface;
 use Laminas\Validator\AbstractValidator;
+use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
@@ -21,6 +21,7 @@ final class VerifyPhoneNumber extends AbstractValidator
     public const string MSG_NETWORK_LOOKUP_FAILURE = 'msgNetworkLookupFailure';
     public const string REGEX_E164                 = "/^\+[1-9]\d{1,14}$/";
 
+    /** @var array<string, string> */
     protected array $messageTemplates = [
         self::MSG_NETWORK_LOOKUP_FAILURE => "There was a network error while checking if '%value%' is valid",
         self::MSG_INVALID_PHONE_NUMBER   => "'%value%' is not a valid phone number",
@@ -28,7 +29,7 @@ final class VerifyPhoneNumber extends AbstractValidator
 
     public function __construct(
         private readonly Client $twilio,
-        private readonly ?StorageInterface $cache = null
+        private readonly ?CacheInterface $cache = null
     ) {
         parent::__construct();
     }
@@ -42,18 +43,16 @@ final class VerifyPhoneNumber extends AbstractValidator
      * @link https://www.twilio.com/docs/glossary/what-e164
      * @link https://www.twilio.com/docs/lookup/v2-api
      *
-     * @param mixed $value
-     * @return bool
-     * @throws ExceptionInterface
+     * @throws InvalidArgumentException
      */
-    public function isValid($value)
+    public function isValid(mixed $value): bool
     {
         assert(is_string($value));
         $this->setValue($value);
 
         $cacheKey = sprintf("key-%s", $value);
-        if ($this->cache?->hasItem($cacheKey)) {
-            $isValid = (bool) $this->cache->getItem($cacheKey);
+        if ($this->cache?->has($cacheKey)) {
+            $isValid = (bool) $this->cache->get($cacheKey);
             if ($isValid) {
                 return true;
             }
@@ -61,7 +60,7 @@ final class VerifyPhoneNumber extends AbstractValidator
 
         if (preg_match(self::REGEX_E164, $value) !== 1) {
             $this->error(self::MSG_INVALID_PHONE_NUMBER);
-            $this->cache?->setItem($cacheKey, false);
+            $this->cache?->set($cacheKey, false);
             return false;
         }
 
@@ -72,17 +71,17 @@ final class VerifyPhoneNumber extends AbstractValidator
             $phoneNumber  = $phoneNumbers->fetch();
         } catch (TwilioException $e) {
             $this->error(self::MSG_NETWORK_LOOKUP_FAILURE);
-            $this->cache?->setItem($cacheKey, false);
+            $this->cache?->set($cacheKey, false);
             return false;
         }
 
         if (! $phoneNumber->valid) {
             $this->error(self::MSG_INVALID_PHONE_NUMBER);
-            $this->cache?->setItem($cacheKey, false);
+            $this->cache?->set($cacheKey, false);
             return false;
         }
 
-        $this->cache?->setItem($cacheKey, true);
+        $this->cache?->set($cacheKey, true);
         return true;
     }
 }

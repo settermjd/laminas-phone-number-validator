@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace SettermjdTest\Validator;
 
-use Laminas\Cache\Storage\StorageInterface;
 use Laminas\Validator\ValidatorInterface;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\CacheInterface;
 use Settermjd\Validator\VerifyPhoneNumber;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
@@ -28,18 +28,18 @@ class VerifyPhoneNumberTest extends TestCase
     #[TestWith(['61', true, false])]
     public function testCanCacheValidationChecks(string $phoneNumber, bool $itemInCache, bool $phoneNumberIsValid): void
     {
-        /** @var StorageInterface&MockObject $cache */
-        $cache = $this->createMock(StorageInterface::class);
+        /** @var CacheInterface&MockObject $cache */
+        $cache = $this->createMock(CacheInterface::class);
         $cache
             ->expects($this->once())
-            ->method("hasItem")
+            ->method("has")
             ->with(sprintf("key-%s", $phoneNumber))
             ->willReturn($itemInCache);
 
         if ($itemInCache) {
             $cache
                 ->expects($this->once())
-                ->method("getItem")
+                ->method("get")
                 ->with(sprintf("key-%s", $phoneNumber))
                 ->willReturn($phoneNumberIsValid);
             $validator = new VerifyPhoneNumber($this->createMock(Client::class), $cache);
@@ -49,7 +49,7 @@ class VerifyPhoneNumberTest extends TestCase
 
         $cache
             ->expects($this->once())
-            ->method("setItem")
+            ->method("set")
             ->with(sprintf("key-%s", $phoneNumber), $phoneNumberIsValid);
 
         if ($phoneNumberIsValid) {
@@ -104,7 +104,7 @@ class VerifyPhoneNumberTest extends TestCase
     private function setupValidator(
         string $phoneNumber,
         bool $phoneNumberIsValid,
-        ?StorageInterface $cache = null
+        ?CacheInterface $cache = null
     ): ValidatorInterface {
         /** @var MockObject $phoneNumberInstance */
         $phoneNumberInstance = $this->createMock(PhoneNumberInstance::class);
