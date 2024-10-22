@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace SettermjdTest\Validator;
 
+use Laminas\Cache\Storage\StorageInterface;
+use Laminas\Validator\ValidatorInterface;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -20,6 +22,51 @@ use function sprintf;
 
 class VerifyPhoneNumberTest extends TestCase
 {
+    #[TestWith(['+61000000000', true, true])]
+    #[TestWith(['+61000000000', false, true])]
+    #[TestWith(['61', false, false])]
+    #[TestWith(['61', true, false])]
+    public function testCanCacheValidationChecks(string $phoneNumber, bool $itemInCache, bool $phoneNumberIsValid): void
+    {
+        /** @var StorageInterface&MockObject $cache */
+        $cache = $this->createMock(StorageInterface::class);
+        $cache
+            ->expects($this->once())
+            ->method("hasItem")
+            ->with(sprintf("key-%s", $phoneNumber))
+            ->willReturn($itemInCache);
+
+        if ($itemInCache) {
+            $cache
+                ->expects($this->once())
+                ->method("getItem")
+                ->with(sprintf("key-%s", $phoneNumber))
+                ->willReturn($phoneNumberIsValid);
+            $validator = new VerifyPhoneNumber($this->createMock(Client::class), $cache);
+            $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
+            return;
+        }
+
+        $cache
+            ->expects($this->once())
+            ->method("setItem")
+            ->with(sprintf("key-%s", $phoneNumber), $phoneNumberIsValid);
+
+        if ($phoneNumberIsValid) {
+            $validator = $this->setupValidator($phoneNumber, $phoneNumberIsValid, $cache);
+            $this->assertTrue($validator->isValid($phoneNumber));
+        } else {
+            $validator = new VerifyPhoneNumber($this->createMock(Client::class), $cache);
+            $this->assertFalse($validator->isValid($phoneNumber));
+            $this->assertSame(
+                [
+                    "msgInvalidPhoneNumber" => sprintf("'%s' is not a valid phone number", $phoneNumber),
+                ],
+                $validator->getMessages()
+            );
+        }
+    }
+
     #[TestWith(['+61000a00000'])]
     #[TestWith(['+61000@00000'])]
     #[TestWith(['61000000000'])]
@@ -45,6 +92,20 @@ class VerifyPhoneNumberTest extends TestCase
     #[TestWith(['+61', false])]
     public function testValidPhoneNumbersValidateSuccessfully(string $phoneNumber, bool $phoneNumberIsValid): void
     {
+        $validator = $this->setupValidator($phoneNumber, $phoneNumberIsValid);
+
+        $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
+        if (! $phoneNumberIsValid) {
+            $message = sprintf("'%s' is not a valid phone number", $phoneNumber);
+            $this->assertSame(["msgInvalidPhoneNumber" => $message], $validator->getMessages());
+        }
+    }
+
+    private function setupValidator(
+        string $phoneNumber,
+        bool $phoneNumberIsValid,
+        ?StorageInterface $cache = null
+    ): ValidatorInterface {
         /** @var MockObject $phoneNumberInstance */
         $phoneNumberInstance = $this->createMock(PhoneNumberInstance::class);
         $phoneNumberInstance->expects($this->once())
@@ -80,13 +141,7 @@ class VerifyPhoneNumberTest extends TestCase
             ->willReturn($lookups);
 
         assert($client instanceof Client);
-        $validator = new VerifyPhoneNumber($client);
-
-        $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
-        if (! $phoneNumberIsValid) {
-            $message = sprintf("'%s' is not a valid phone number", $phoneNumber);
-            $this->assertSame(["msgInvalidPhoneNumber" => $message], $validator->getMessages());
-        }
+        return new VerifyPhoneNumber($client, $cache);
     }
 
     public function testCanHandleExceptionsWhileQueryingTheLookupAPI(): void

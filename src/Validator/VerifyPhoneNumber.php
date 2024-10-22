@@ -4,24 +4,32 @@ declare(strict_types=1);
 
 namespace Settermjd\Validator;
 
+use Laminas\Cache\Exception\ExceptionInterface;
+use Laminas\Cache\Storage\StorageInterface;
 use Laminas\Validator\AbstractValidator;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
+use function assert;
+use function is_string;
 use function preg_match;
+use function sprintf;
 
 final class VerifyPhoneNumber extends AbstractValidator
 {
     public const string MSG_INVALID_PHONE_NUMBER   = 'msgInvalidPhoneNumber';
     public const string MSG_NETWORK_LOOKUP_FAILURE = 'msgNetworkLookupFailure';
+    public const string REGEX_E164                 = "/^\+[1-9]\d{1,14}$/";
 
     protected array $messageTemplates = [
         self::MSG_NETWORK_LOOKUP_FAILURE => "There was a network error while checking if '%value%' is valid",
         self::MSG_INVALID_PHONE_NUMBER   => "'%value%' is not a valid phone number",
     ];
 
-    public function __construct(private readonly Client $twilio)
-    {
+    public function __construct(
+        private readonly Client $twilio,
+        private readonly ?StorageInterface $cache = null
+    ) {
         parent::__construct();
     }
 
@@ -36,31 +44,45 @@ final class VerifyPhoneNumber extends AbstractValidator
      *
      * @param mixed $value
      * @return bool
+     * @throws ExceptionInterface
      */
     public function isValid($value)
     {
+        assert(is_string($value));
         $this->setValue($value);
 
-        if (preg_match("/^\+[1-9]\d{1,14}$/", (string) $value) !== 1) {
+        $cacheKey = sprintf("key-%s", $value);
+        if ($this->cache?->hasItem($cacheKey)) {
+            $isValid = (bool) $this->cache->getItem($cacheKey);
+            if ($isValid) {
+                return true;
+            }
+        }
+
+        if (preg_match(self::REGEX_E164, $value) !== 1) {
             $this->error(self::MSG_INVALID_PHONE_NUMBER);
+            $this->cache?->setItem($cacheKey, false);
             return false;
         }
 
         try {
             $lookups      = $this->twilio->lookups;
             $v2           = $lookups->v2;
-            $phoneNumbers = $v2->phoneNumbers((string) $value);
+            $phoneNumbers = $v2->phoneNumbers($value);
             $phoneNumber  = $phoneNumbers->fetch();
         } catch (TwilioException $e) {
             $this->error(self::MSG_NETWORK_LOOKUP_FAILURE);
+            $this->cache?->setItem($cacheKey, false);
             return false;
         }
 
         if (! $phoneNumber->valid) {
             $this->error(self::MSG_INVALID_PHONE_NUMBER);
+            $this->cache?->setItem($cacheKey, false);
             return false;
         }
 
+        $this->cache?->setItem($cacheKey, true);
         return true;
     }
 }
