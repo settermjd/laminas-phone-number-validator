@@ -39,6 +39,7 @@
     "cs-check": "phpcs",
     "cs-fix": "phpcbf",
     "docs-check": "markdownlint --config .markdownlint.yaml README.md",
+    "docs-fix": "markdownlint --fix --config .markdownlint.yaml README.md",
     "test": "phpunit --colors=always",
     "test-coverage": "phpunit --colors=always --coverage-clover clover.xml",
     "static-analysis": "psalm --shepherd --stats"
