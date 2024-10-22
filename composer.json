@@ -54,6 +54,7 @@
     "laminas/laminas-cache": "^4.0",
     "phpunit/phpunit": "^10.5",
     "psalm/plugin-phpunit": "^0.19.0",
+    "roave/security-advisories": "dev-latest",
     "squizlabs/php_codesniffer": "^3.10",
     "vimeo/psalm": "^5.26"
   },
