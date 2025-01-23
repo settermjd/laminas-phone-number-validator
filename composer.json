@@ -47,7 +47,8 @@
   "require": {
     "php": "~8.3.0 || ~8.4.0",
     "laminas/laminas-coding-standard": "^3.0",
-    "laminas/laminas-validator": "^3.0.0",
+    "laminas/laminas-inputfilter": "^2.31",
+    "laminas/laminas-validator": "^2.60.0",
     "twilio/sdk": "^8.3",
     "vlucas/phpdotenv": "^5.6"
   },
