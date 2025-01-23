@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SettermjdTest\Validator;
 
-use Laminas\Validator\ValidatorInterface;
 use PHPUnit\Framework\Attributes\TestWith;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
@@ -42,7 +42,10 @@ class VerifyPhoneNumberTest extends TestCase
                 ->method("get")
                 ->with(sprintf("key-%s", $phoneNumber))
                 ->willReturn($phoneNumberIsValid);
-            $validator = new VerifyPhoneNumber($this->createMock(Client::class), $cache);
+            $validator = new VerifyPhoneNumber(
+                twilioClient: $this->createMock(Client::class),
+                cache: $cache
+            );
             $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
             return;
         }
@@ -53,10 +56,19 @@ class VerifyPhoneNumberTest extends TestCase
             ->with(sprintf("key-%s", $phoneNumber), $phoneNumberIsValid);
 
         if ($phoneNumberIsValid) {
-            $validator = $this->setupValidator($phoneNumber, $phoneNumberIsValid, $cache);
+            $validator = $this->setupValidator(
+                $phoneNumber,
+                $phoneNumberIsValid,
+                [],
+                [],
+                $cache
+            );
             $this->assertTrue($validator->isValid($phoneNumber));
         } else {
-            $validator = new VerifyPhoneNumber($this->createMock(Client::class), $cache);
+            $validator = new VerifyPhoneNumber(
+                twilioClient: $this->createMock(Client::class),
+                cache: $cache
+            );
             $this->assertFalse($validator->isValid($phoneNumber));
             $this->assertSame(
                 [
@@ -65,6 +77,159 @@ class VerifyPhoneNumberTest extends TestCase
                 $validator->getMessages()
             );
         }
+    }
+
+    /**
+     * @param array<string,string> $suppliedQueryParameters
+     * @param array<string,string> $expectedQueryParameters
+     * @throws Exception
+     */
+    #[TestWith([
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'PostalCode'         => '123456',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+            'Fields'             => 'sim_swap,call_forwarding',
+        ],
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'PostalCode'         => '123456',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+            'Fields'             => 'sim_swap,call_forwarding',
+        ],
+    ])]
+    #[TestWith([
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'PostCode'           => '123456',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+            'Fields'             => 'sim_swap,call_forwarding',
+        ],
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+            'Fields'             => 'sim_swap,call_forwarding',
+        ],
+    ])]
+    #[TestWith([
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'PostCode'           => '123456',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+            'Fields'             => 'sam_swap,call_forwarding',
+        ],
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+            'Fields'             => 'call_forwarding',
+        ],
+    ])]
+    #[TestWith([
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'PostCode'           => '123456',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+        ],
+        [
+            'CountryCode'        => 'AU',
+            'FirstName'          => 'Matthew',
+            'LastName'           => 'Setter',
+            'AddressLine1'       => '1 Nowhere Road',
+            'AddressLine2'       => '',
+            'City'               => 'Nowhere',
+            'State'              => 'NW',
+            'AddressCountryCode' => 'AU',
+            'NationalId'         => 'MX12345678',
+            'DateOfBirth'        => '19700101',
+            'LastVerifiedDate'   => '20240123',
+            'VerificationSid'    => 'SX12345678',
+        ],
+    ])]
+    public function testOnlyAcceptsValidQueryParametersAndFields(
+        array $suppliedQueryParameters,
+        array $expectedQueryParameters
+    ): void {
+        /** @var MockObject&Client $client */
+        $client      = $this->createMock(Client::class);
+        $phoneNumber = '+61000000000';
+        $validator   = $this->setupValidator(
+            phoneNumber: $phoneNumber,
+            phoneNumberIsValid: true,
+            queryParameters: $suppliedQueryParameters,
+            filteredQueryParameters: $expectedQueryParameters,
+        );
+        $this->assertSame($expectedQueryParameters, $validator->getQueryParameters());
+        $validator->isValid($phoneNumber);
     }
 
     #[TestWith(['+61000a00000'])]
@@ -92,8 +257,7 @@ class VerifyPhoneNumberTest extends TestCase
     #[TestWith(['+61', false])]
     public function testValidPhoneNumbersValidateSuccessfully(string $phoneNumber, bool $phoneNumberIsValid): void
     {
-        $validator = $this->setupValidator($phoneNumber, $phoneNumberIsValid);
-
+        $validator = $this->setupValidator($phoneNumber, $phoneNumberIsValid, []);
         $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
         if (! $phoneNumberIsValid) {
             $message = sprintf("'%s' is not a valid phone number", $phoneNumber);
@@ -101,11 +265,18 @@ class VerifyPhoneNumberTest extends TestCase
         }
     }
 
+    /**
+     * @param array<string,string> $queryParameters
+     * @param array<string,string> $filteredQueryParameters
+     * @throws Exception
+     */
     private function setupValidator(
         string $phoneNumber,
         bool $phoneNumberIsValid,
+        array $queryParameters = [],
+        array $filteredQueryParameters = [],
         ?CacheInterface $cache = null
-    ): ValidatorInterface {
+    ): VerifyPhoneNumber {
         /** @var MockObject $phoneNumberInstance */
         $phoneNumberInstance = $this->createMock(PhoneNumberInstance::class);
         $phoneNumberInstance->expects($this->once())
@@ -115,9 +286,16 @@ class VerifyPhoneNumberTest extends TestCase
 
         /** @var MockObject $context */
         $context = $this->createMock(PhoneNumberContext::class);
-        $context->expects($this->once())
-            ->method("fetch")
-            ->willReturn($phoneNumberInstance);
+        if (! empty($queryParameters)) {
+            $context->expects($this->once())
+                ->method("fetch")
+                ->with($filteredQueryParameters)
+                ->willReturn($phoneNumberInstance);
+        } else {
+            $context->expects($this->once())
+                ->method("fetch")
+                ->willReturn($phoneNumberInstance);
+        }
 
         /** @var MockObject $v2 */
         $v2 = $this->createMock(V2::class);
@@ -141,7 +319,11 @@ class VerifyPhoneNumberTest extends TestCase
             ->willReturn($lookups);
 
         assert($client instanceof Client);
-        return new VerifyPhoneNumber($client, $cache);
+        return new VerifyPhoneNumber(
+            twilioClient: $client,
+            queryParameters: $queryParameters,
+            cache: $cache
+        );
     }
 
     public function testCanHandleExceptionsWhileQueryingTheLookupAPI(): void
