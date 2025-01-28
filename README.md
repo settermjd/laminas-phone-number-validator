@@ -1,6 +1,6 @@
 # Phone Number Validator that uses Twilio's Lookup (V2) API
 
-![GitHub Actions Workflow Status](https://github.com/settermjd/laminas-phone-number-validator/actions/workflows/php.yml/badge.svg)
+![Build Status](https://github.com/settermjd/laminas-phone-number-validator/actions/workflows/php.yml/badge.svg)
 
 This is a custom laminas-validator class that checks if a phone number is valid by using Twilio's Lookup API.
 
@@ -96,7 +96,7 @@ if ($inputFilter->isValid()) {
 In both of the above examples, the `VerifyPhoneNumber` validator is initialised with a `Twilio\Rest\Client` object, which in turn is initialised with a Twilio Account SID and Auth Token.
 To retrieve these, open [the Twilio Console][twilio-console-url] in your browser of choice, then copy the **Account SID** and **Auth Token** from the **Account Info**, as you can see in the screenshot below.
 
-![The Account Info panel of the Twilio Console, showing a user's Account SID, Auth Token, and phone number, where the Account SID and phone number have been partially or completely redacted.](./docs-orig/images/twilio-console-account-info-panel.png)
+![The Account Info panel of the Twilio Console, showing a user's Account SID, Auth Token, and phone number, where the Account SID and phone number have been partially or completely redacted.](./docs/images/twilio-console-account-info-panel.png)
 
 > [!CAUTION]
 > Use a package such as [PHP Dotenv][phpdotenv-url] to keep credentials, such as the Twilio Account SID and Auth Token out of code, and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
