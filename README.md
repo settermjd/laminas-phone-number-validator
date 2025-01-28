@@ -22,7 +22,7 @@ To use the application, you'll need the following:
 
 ### Add the Package as a Project Dependency
 
-To use the package in your project, first, either add it as a required package in _composer.json_'s `require` attribute.
+To use the package in your project, first, either add it in _composer.json_'s `require` attribute, as in the example below.
 
 ```json
 "require": {
@@ -38,7 +38,7 @@ composer require settermjd/laminas-twilio-phone-number-validator
 
 ### How to Use the Validator
 
-Then, you can either use it directly, as in the following example, to validate a phone number.
+You can use it directly, as in the following example, to validate a phone number.
 
 ```php
 use Settermjd\Validator\VerifyPhoneNumber;
@@ -50,9 +50,9 @@ $validator = new VerifyPhoneNumber(new Client(
 ));
 
 if ($validator->isValid($email)) {
-    // The phone number is valid, so do what you want with the information.
+    // The phone number is valid, so do what you want knowing that.
 } else {
-    // The phone number is not invalid, so print the reasons why.
+    // The phone number is not valid, so show the reasons why.
     foreach ($validator->getMessages() as $messageId => $message) {
         printf("Validation failure '%s': %s\n", $messageId, $message);
     }
@@ -93,13 +93,59 @@ if ($inputFilter->isValid()) {
 }
 ```
 
-In both of the above examples, the `VerifyPhoneNumber` validator is initialised with a `Twilio\Rest\Client` object which is initialised with a Twilio Account SID and Auth Token.
-To retrieve these, open [the Twilio Console][twilio-console-url] in your browser of choice, then copy the Account SID and Auth Token, as you can see in the screenshot below.
+In both of the above examples, the `VerifyPhoneNumber` validator is initialised with a `Twilio\Rest\Client` object, which in turn is initialised with a Twilio Account SID and Auth Token.
+To retrieve these, open [the Twilio Console][twilio-console-url] in your browser of choice, then copy the **Account SID** and **Auth Token** from the **Account Info**, as you can see in the screenshot below.
 
-![The Account Info panel of the Twilio Console, showing a user's Account SID, Auth Token, and phone number, where the Account SID and phone number have been partially or completely redacted.](./docs/images/twilio-console-account-info-panel.png)
+![The Account Info panel of the Twilio Console, showing a user's Account SID, Auth Token, and phone number, where the Account SID and phone number have been partially or completely redacted.](./docs-orig/images/twilio-console-account-info-panel.png)
 
 > [!CAUTION]
 > Use a package such as [PHP Dotenv][phpdotenv-url] to keep credentials, such as the Twilio Account SID and Auth Token out of code, and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
+
+#### Supply query parameters
+
+The previous example didn't supply any query parameters.
+They allow you to retrieve additional data during the lookup, such as [when the SIM was last swapped](https://www.twilio.com/en-us/blog/how-to-detect-sim-swap-with-php-before-sending-sms-otp), and whether call forwarding is enabled.
+
+> [!CAUTION]
+> Be aware that some query parameters, such as in `Field`s require data packages which will incur charges on your account. Please double-check your code before running it so that you don't accidentally incur excessive unintended Lookup charges.
+
+##### Filter and validate query parameters
+
+To ensure that the query parameters provided to the validator are valid, you can use the `QueryParametersInputFilter`.
+This is a custom [laminas-inputfilter](https://docs.laminas.dev/laminas-inputfilter/intro/) class which ensures that the query parameter data provided is valid, and doesn't contain malicious information or values unsupported by the Lookup API.
+
+```php
+use Laminas\InputFilter\InputFilter;
+use Laminas\InputFilter\Input;
+use Laminas\Validator;
+use Settermjd\InputFilter\QueryParametersInputFilter;
+use Settermjd\Validator\VerifyPhoneNumber;
+use Twilio\Rest\Client;
+
+$inputFilter = new QueryParametersInputFilter();
+$inputFilter->setData($suppliedQueryParameters);
+if ($inputFilter->isValid()) {
+    $validator = new VerifyPhoneNumber(
+        twilioClient: new Client(
+            `<YOUR_TWILIO_ACCOUNT_SID>`,
+            `<YOUR_TWILIO_AUTH_TOKEN>`,
+        ),
+        queryParameters: $inputFilter->getValues(),
+    );
+
+    if ($validator->isValid($email)) {
+        // The phone number is valid, so do what you want knowing that.
+    } else {
+        // The phone number is not valid, so show the reasons why.
+        foreach ($validator->getMessages() as $messageId => $message) {
+            printf("Validation failure '%s': %s\n", $messageId, $message);
+        }
+    }
+}
+```
+
+In the example above, the query parameters (`$suppliedQueryParameters`) are checked with `QueryParametersInputFilter`.
+If the data is valid, then the `VerifyPhoneNumber` validator is instantiated and used; that code is exactly the same as in the first example above.
 
 #### Add Caching Support
 
@@ -120,8 +166,8 @@ $storageFactory = $container->get(StorageAdapterFactoryInterface::class);
 $storage = $storageFactory->create('apc');
 
 $validator = new VerifyPhoneNumber(
-    new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`), 
-    new SimpleCacheDecorator($storage)
+    twilioClient: new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`), 
+    cache: new SimpleCacheDecorator($storage),
 );
 ```
 
