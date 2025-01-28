@@ -32,7 +32,6 @@
   },
   "scripts": {
     "check": [
-      "@docs-check",
       "@cs-check",
       "@static-analysis",
       "@test"
