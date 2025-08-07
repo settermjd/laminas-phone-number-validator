@@ -2,7 +2,7 @@
 
 ![Build Status](https://github.com/settermjd/laminas-phone-number-validator/actions/workflows/php.yml/badge.svg)
 
-This is a custom laminas-validator class that checks if a phone number is valid by using Twilio's Lookup API.
+This is a custom laminas-validator class that checks if a phone number is valid by using [Twilio's Lookup API][twilio-lookup-api-url].
 
 ## Overview
 
@@ -14,7 +14,7 @@ To use the application, you'll need the following:
 
 - A Twilio account (free or paid).
   [Create an account][twilio-referral-url] if you don't already have one.
-- PHP 8.3
+- PHP 8.3 or 8.4
 - [Composer][composer-url] installed globally
 - [Git][git-url]
 
@@ -199,3 +199,4 @@ If the project was useful, and you want to say thank you and/or support its acti
 [phpdotenv-url]: https://github.com/vlucas/phpdotenv
 [psr16-url]: https://www.php-fig.org/psr/psr-16/
 [simplecache-implementation-url]: https://packagist.org/providers/psr/simple-cache-implementation
+[twilio-lookup-api-url]: https://www.twilio.com/docs/lookup
