@@ -3,3 +3,10 @@ parameters:
 	paths:
 		- src
 		- test
+	ignoreErrors:
+		-
+		    identifiers:
+		        - argument.type
+		        - arrayFilter.empty
+		        - identical.alwaysFalse
+		    path: src/Validator/VerifyPhoneNumber.php

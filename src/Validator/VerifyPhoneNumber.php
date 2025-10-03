@@ -7,9 +7,12 @@ namespace Settermjd\Validator;
 use Laminas\Validator\AbstractValidator;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use Settermjd\Exception\InvalidQueryParametersException;
+use Settermjd\InputFilter\QueryParametersInputFilter;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 
+use function array_filter;
 use function assert;
 use function is_string;
 use function preg_match;
@@ -20,6 +23,15 @@ final class VerifyPhoneNumber extends AbstractValidator
     public const string MSG_INVALID_PHONE_NUMBER   = 'msgInvalidPhoneNumber';
     public const string MSG_NETWORK_LOOKUP_FAILURE = 'msgNetworkLookupFailure';
     public const string REGEX_E164                 = "/^\+[1-9]\d{1,14}$/";
+
+    /**
+     * An array of one or more query parameters supported by Twilio's Lookup (V2) API
+     *
+     * @see https://www.twilio.com/docs/lookup/v2-api#query-parameters-1
+     *
+     * @var array<string,string>
+     */
+    private array $queryParameters = [];
 
     /** @var array<string, string> */
     protected array $messageTemplates = [
@@ -32,10 +44,13 @@ final class VerifyPhoneNumber extends AbstractValidator
      */
     public function __construct(
         private readonly Client $twilioClient,
-        private readonly array $queryParameters = [],
+        private readonly QueryParametersInputFilter $inputFilter,
+        array $queryParameters = [],
         private readonly ?CacheInterface $cache = null
     ) {
         parent::__construct();
+
+        $this->setQueryParameters($queryParameters);
     }
 
     /**
@@ -87,5 +102,32 @@ final class VerifyPhoneNumber extends AbstractValidator
 
         $this->cache?->set($cacheKey, true);
         return true;
+    }
+
+    /**
+     * @param array<string,string> $queryParameters
+     */
+    public function setQueryParameters(array $queryParameters = []): void
+    {
+        $this->inputFilter->setData($queryParameters);
+        if (! $this->inputFilter->isValid()) {
+            throw new InvalidQueryParametersException(
+                message: 'Invalid query parameters.',
+                validationMessages: $this->inputFilter->getMessages(),
+            );
+        }
+
+        if ($this->inputFilter->getValues() === []) {
+            return;
+        }
+        $this->queryParameters = array_filter($this->inputFilter->getValues());
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    public function getQueryParameters(): array
+    {
+        return $this->queryParameters;
     }
 }

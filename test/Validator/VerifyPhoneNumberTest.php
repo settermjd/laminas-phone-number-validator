@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace SettermjdTest\Validator;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
+use Settermjd\Exception\InvalidQueryParametersException;
+use Settermjd\InputFilter\QueryParametersInputFilter;
 use Settermjd\Validator\VerifyPhoneNumber;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
@@ -44,6 +47,7 @@ class VerifyPhoneNumberTest extends TestCase
                 ->willReturn($phoneNumberIsValid);
             $validator = new VerifyPhoneNumber(
                 twilioClient: $this->createMock(Client::class),
+                inputFilter: new QueryParametersInputFilter(),
                 cache: $cache
             );
             $this->assertSame($phoneNumberIsValid, $validator->isValid($phoneNumber));
@@ -67,6 +71,7 @@ class VerifyPhoneNumberTest extends TestCase
         } else {
             $validator = new VerifyPhoneNumber(
                 twilioClient: $this->createMock(Client::class),
+                inputFilter: new QueryParametersInputFilter(),
                 cache: $cache
             );
             $this->assertFalse($validator->isValid($phoneNumber));
@@ -86,7 +91,10 @@ class VerifyPhoneNumberTest extends TestCase
     #[TestWith(['61'])]
     public function testPhoneNumbersMustPassE164Regex(string $invalidPhoneNumber): void
     {
-        $validator = new VerifyPhoneNumber($this->createMock(Client::class));
+        $validator = new VerifyPhoneNumber(
+            $this->createMock(Client::class),
+            inputFilter: new QueryParametersInputFilter(),
+        );
 
         $this->assertFalse($validator->isValid($invalidPhoneNumber));
         $this->assertSame(
@@ -168,6 +176,7 @@ class VerifyPhoneNumberTest extends TestCase
         assert($client instanceof Client);
         return new VerifyPhoneNumber(
             twilioClient: $client,
+            inputFilter: new QueryParametersInputFilter(),
             queryParameters: $queryParameters,
             cache: $cache
         );
@@ -205,10 +214,143 @@ class VerifyPhoneNumberTest extends TestCase
             ->willReturn($lookups);
 
         assert($client instanceof Client);
-        $validator = new VerifyPhoneNumber($client);
+        $validator = new VerifyPhoneNumber(
+            $client,
+            inputFilter: new QueryParametersInputFilter(),
+        );
 
         $this->assertFalse($validator->isValid($phoneNumber));
         $message = sprintf("There was a network error while checking if '%s' is valid", $phoneNumber);
         $this->assertSame(["msgNetworkLookupFailure" => $message], $validator->getMessages());
+    }
+
+    /**
+     * @param array<string,string> $queryParameters
+     * @param array<string,array<string,string>> $validationMessages
+     */
+    #[DataProvider('inValidQueryParameters')]
+    public function testThrowsExceptionWhenSettingQueryParametersWhenOneOrMoreParametersAreInvalid(
+        array $queryParameters,
+        array $validationMessages,
+    ): void {
+        try {
+            $validator = new VerifyPhoneNumber(
+                twilioClient: $this->createMock(Client::class),
+                inputFilter: new QueryParametersInputFilter(),
+            );
+            $validator->setQueryParameters($queryParameters);
+        } catch (InvalidQueryParametersException $e) {
+            $this->assertSame($validationMessages, $e->getValidationMessages());
+        }
+    }
+
+    /**
+     * @return array<int,array<int,array<string,string>|array<string,array<string,string>>>>
+     */
+    public static function inValidQueryParameters(): array
+    {
+        return [
+            [
+                [
+                    'addressCountryCode' => 'AU',
+                    'addressLine1'       => '1 Nowhere Road',
+                    'addressLine2'       => '',
+                    'city'               => 'Nowhere',
+                    'countryCode'        => 'AU',
+                    'dateOfBirth'        => '19700101',
+                    'fields'             => 'sim_swap,call_forwarding',
+                    'firstName'          => 'Matthew',
+                    'lastName'           => 'Setter',
+                    'lastVerifiedDate'   => '20240123',
+                    'nationalId'         => 'MX12345678',
+                    'postalCode'         => '123456',
+                    'state'              => 'NW',
+                    'verificationSid'    => '0a2bdbcb53a4632ad7c7b17c20000000',
+                ],
+                [
+                    'verificationSid' => [
+                        'stringLengthTooShort' => 'The input is less than 34 characters long',
+                        'regexNotMatch'        => "The input does not match against pattern '/VA[0-9a-f]{32}/'",
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array<string,string> $suppliedQueryParameters
+     * @param array<string,string> $retrievedQueryParameters
+     */
+    #[DataProvider('validQueryParameters')]
+    public function testCanSetQueryParameters(
+        array $suppliedQueryParameters,
+        array $retrievedQueryParameters,
+    ): void {
+        $validator = new VerifyPhoneNumber(
+            twilioClient: $this->createMock(Client::class),
+            inputFilter: new QueryParametersInputFilter(),
+        );
+        $validator->setQueryParameters($suppliedQueryParameters);
+        $this->assertSame($retrievedQueryParameters, $validator->getQueryParameters());
+    }
+
+    /**
+     * @return array<int,array<int,array<string,string>>>
+     */
+    public static function validQueryParameters(): array
+    {
+        return [
+            [
+                [
+                    'addressCountryCode' => 'AU',
+                    'addressLine1'       => '1 Nowhere Road',
+                    'addressLine2'       => '',
+                    'city'               => 'Nowhere',
+                    'countryCode'        => 'AU',
+                    'dateOfBirth'        => '19700101',
+                    'fields'             => 'sim_swap,call_forwarding',
+                    'firstName'          => 'Matthew',
+                    'lastName'           => 'Setter',
+                    'lastVerifiedDate'   => '20240123',
+                    'nationalId'         => 'MX12345678',
+                    'postalCode'         => '123456',
+                    'state'              => 'NW',
+                    'verificationSid'    => 'VA0a2bdbcb53a4632ad7c7b17c20000000',
+                ],
+                [
+                    'addressCountryCode' => 'AU',
+                    'addressLine1'       => '1 Nowhere Road',
+                    'city'               => 'Nowhere',
+                    'countryCode'        => 'AU',
+                    'dateOfBirth'        => '19700101',
+                    'fields'             => 'sim_swap,call_forwarding',
+                    'firstName'          => 'Matthew',
+                    'lastName'           => 'Setter',
+                    'lastVerifiedDate'   => '20240123',
+                    'nationalId'         => 'MX12345678',
+                    'postalCode'         => '123456',
+                    'state'              => 'NW',
+                    'verificationSid'    => 'VA0a2bdbcb53a4632ad7c7b17c20000000',
+                ],
+            ],
+            [
+                [
+                    'AddressCountryCode' => 'AU',
+                    'AddressLine1'       => '1 Nowhere Road',
+                    'City'               => 'Nowhere',
+                    'CountryCode'        => 'AU',
+                    'DateOfBirth'        => '19700101',
+                    'Fields'             => 'sim_swap,call_forwarding',
+                    'FirstName'          => 'Matthew',
+                    'LastName'           => 'Setter',
+                    'LastVerifiedDate'   => '20240123',
+                    'NationalId'         => 'MX12345678',
+                    'PostalCode'         => '123456',
+                    'State'              => 'NW',
+                    'VerificationSid'    => 'VA0a2bdbcb53a4632ad7c7b17c20000000',
+                ],
+                [],
+            ],
+        ];
     }
 }

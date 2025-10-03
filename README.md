@@ -65,6 +65,7 @@ Or, you can use it in conjunction with [laminas-inputfilter][laminas-inputfilter
 use Laminas\InputFilter\InputFilter;
 use Laminas\InputFilter\Input;
 use Laminas\Validator;
+use Settermjd\Filter\QueryParametersFilter;
 use Settermjd\Validator\VerifyPhoneNumber;
 use Twilio\Rest\Client;
 
@@ -75,7 +76,8 @@ $phoneNumber->getValidatorChain()
               new Client(
                   `<TWILIO_ACCOUNT_SID>`,
                   `<TWILIO_AUTH_TOKEN>`,
-              )
+              ),
+              new QueryParametersFilter(),
           )
     );
 
@@ -104,10 +106,39 @@ To retrieve these, open [the Twilio Console][twilio-console-url] in your browser
 #### Supply query parameters
 
 The previous example didn't supply any query parameters.
-They allow you to retrieve additional data during the lookup, such as [when the SIM was last swapped](https://www.twilio.com/en-us/blog/how-to-detect-sim-swap-with-php-before-sending-sms-otp), and whether call forwarding is enabled.
+Query parameters allow you to retrieve additional data during the lookup, such as [when the SIM was last swapped](https://www.twilio.com/en-us/blog/how-to-detect-sim-swap-with-php-before-sending-sms-otp), and whether call forwarding is enabled.
 
 > [!CAUTION]
 > Be aware that some query parameters, such as in `Field`s require data packages which will incur charges on your account. Please double-check your code before running it so that you don't accidentally incur excessive unintended Lookup charges.
+
+To set them:
+
+- Pass an array of [query parameters supported by Twilio's Lookup (V2) API][twilio-lookup-api-query-parameters-url] of them to the constructor
+- Pass an array of them to a call to the `setQueryParameters()` function
+
+```php
+use Settermjd\Filter\QueryParametersFilter;
+use Settermjd\Validator\VerifyPhoneNumber;
+use Twilio\Rest\Client;
+
+$validator = new VerifyPhoneNumber(
+  new Client(
+      `<YOUR_TWILIO_ACCOUNT_SID>`,
+      `<YOUR_TWILIO_AUTH_TOKEN>`,
+  )
+  new QueryParametersFilter(),
+)->setQueryParameters(
+  [
+      'fields'             => 'sim_swap,call_forwarding',
+      'firstName'          => 'Matthew',
+      'lastName'           => 'Setter',
+      'lastVerifiedDate'   => '20240123',
+      'nationalId'         => 'MX12345678',
+  ]
+);
+```
+
+The method supports either an array of [supported query parameters](https://www.twilio.com/docs/lookup/v2-api#query-parameters-1), or a `QueryParameter` object.
 
 ##### Filter and validate query parameters
 
@@ -126,11 +157,11 @@ $inputFilter = new QueryParametersInputFilter();
 $inputFilter->setData($suppliedQueryParameters);
 if ($inputFilter->isValid()) {
     $validator = new VerifyPhoneNumber(
-        twilioClient: new Client(
+        new Client(
             `<YOUR_TWILIO_ACCOUNT_SID>`,
             `<YOUR_TWILIO_AUTH_TOKEN>`,
         ),
-        queryParameters: $inputFilter->getValues(),
+        new QueryParametersFilter(),
     );
 
     if ($validator->isValid($email)) {
@@ -146,6 +177,7 @@ if ($inputFilter->isValid()) {
 
 In the example above, the query parameters (`$suppliedQueryParameters`) are checked with `QueryParametersInputFilter`.
 If the data is valid, then the `VerifyPhoneNumber` validator is instantiated and used; that code is exactly the same as in the first example above.
+If one or more of the query parameters are not valid, then an exception will be thrown, containing information about which query parameter was not valid and why.
 
 #### Add Caching Support
 
@@ -156,6 +188,7 @@ So, if you want to further enhance performance, when initialising a `VerifyPhone
 use Laminas\Cache\Psr\SimpleCache\SimpleCacheDecorator;
 use Laminas\Cache\Service\StorageAdapterFactoryInterface;
 use Psr\Container\ContainerInterface;
+use Settermjd\InputFilter\QueryParametersInputFilter;
 use Settermjd\Validator\VerifyPhoneNumber;
 use Twilio\Rest\Client;
 
@@ -166,7 +199,8 @@ $storageFactory = $container->get(StorageAdapterFactoryInterface::class);
 $storage = $storageFactory->create('apc');
 
 $validator = new VerifyPhoneNumber(
-    twilioClient: new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`), 
+    new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`), 
+    new QueryParametersFilter(),
     cache: new SimpleCacheDecorator($storage),
 );
 ```
@@ -200,3 +234,4 @@ If the project was useful, and you want to say thank you and/or support its acti
 [psr16-url]: https://www.php-fig.org/psr/psr-16/
 [simplecache-implementation-url]: https://packagist.org/providers/psr/simple-cache-implementation
 [twilio-lookup-api-url]: https://www.twilio.com/docs/lookup
+[twilio-lookup-api-query-parameters-url]: https://www.twilio.com/docs/lookup/v2-api#query-parameters-1
