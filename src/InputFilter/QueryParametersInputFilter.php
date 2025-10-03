@@ -42,7 +42,7 @@ class QueryParametersInputFilter extends InputFilter
 
     public function __construct()
     {
-        $addressCountryCode = new Input("AddressCountryCode");
+        $addressCountryCode = new Input("addressCountryCode");
         $addressCountryCode->setRequired(false);
         $addressCountryCode
             ->getValidatorChain()
@@ -56,28 +56,28 @@ class QueryParametersInputFilter extends InputFilter
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $addressLine1 = new Input("AddressLine1");
+        $addressLine1 = new Input("addressLine1");
         $addressLine1->setRequired(false);
         $addressLine1
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $addressLine2 = new Input("AddressLine2");
+        $addressLine2 = new Input("addressLine2");
         $addressLine2->setRequired(false);
         $addressLine2
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $city = new Input("City");
+        $city = new Input("city");
         $city->setRequired(false);
         $city
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $countryCode = new Input("CountryCode");
+        $countryCode = new Input("countryCode");
         $countryCode->setRequired(false);
         $countryCode->setRequired(false);
         $countryCode
@@ -92,7 +92,7 @@ class QueryParametersInputFilter extends InputFilter
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $dateOfBirth = new Input("DateOfBirth");
+        $dateOfBirth = new Input("dateOfBirth");
         $dateOfBirth->setRequired(false);
         $dateOfBirth
             ->getValidatorChain()
@@ -105,7 +105,7 @@ class QueryParametersInputFilter extends InputFilter
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $fields = new Input("Fields");
+        $fields = new Input("fields");
         $fields->setRequired(false);
         $fields
             ->getFilterChain()
@@ -124,21 +124,21 @@ class QueryParametersInputFilter extends InputFilter
                 ]),
             ]));
 
-        $firstName = new Input("FirstName");
+        $firstName = new Input("firstName");
         $firstName->setRequired(false);
         $firstName
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $lastName = new Input("LastName");
+        $lastName = new Input("lastName");
         $lastName->setRequired(false);
         $lastName
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $lastVerificationDate = new Input("LastVerifiedDate");
+        $lastVerificationDate = new Input("lastVerifiedDate");
         $lastVerificationDate->setRequired(false);
         $lastVerificationDate
             ->getFilterChain()
@@ -151,28 +151,28 @@ class QueryParametersInputFilter extends InputFilter
                 'strict' => true,
             ]));
 
-        $nationalId = new Input("NationalId");
+        $nationalId = new Input("nationalId");
         $nationalId->setRequired(false);
         $nationalId
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $postCode = new Input("PostalCode");
+        $postCode = new Input("postalCode");
         $postCode->setRequired(false);
         $postCode
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $state = new Input("State");
+        $state = new Input("state");
         $state->setRequired(false);
         $state
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags());
 
-        $verificationSid = new Input("VerificationSid");
+        $verificationSid = new Input("verificationSid");
         $verificationSid->setRequired(false);
         $verificationSid->setAllowEmpty(true);
         $verificationSid
