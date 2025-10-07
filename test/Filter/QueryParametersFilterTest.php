@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SettermjdTest\Filter;
+namespace Settermjd\LaminasPhoneNumberValidatorTest\Filter;
 
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
-use Settermjd\Filter\QueryParametersFilter;
+use Settermjd\LaminasPhoneNumberValidator\Filter\QueryParametersFilter;
 
 class QueryParametersFilterTest extends TestCase
 {

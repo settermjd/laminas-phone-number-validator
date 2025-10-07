@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Settermjd\InputFilter;
+namespace Settermjd\LaminasPhoneNumberValidator\InputFilter;
 
 use Laminas\Filter\AllowList;
 use Laminas\Filter\StringToUpper;
@@ -111,7 +111,7 @@ class QueryParametersInputFilter extends InputFilter
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags())
-            ->attach(new \Settermjd\Filter\Explode([
+            ->attach(new \Settermjd\LaminasPhoneNumberValidator\Filter\Explode([
                 'filter' => new AllowList([
                     'list' => self::SUPPORTED_FIELDS,
                 ]),

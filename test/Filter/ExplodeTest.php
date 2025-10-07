@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace SettermjdTest\Filter;
+namespace Settermjd\LaminasPhoneNumberValidatorTest\Filter;
 
 use Laminas\Filter\AllowList;
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use Settermjd\Filter\Explode;
+use Settermjd\LaminasPhoneNumberValidator\Filter\Explode;
 
 class ExplodeTest extends TestCase
 {

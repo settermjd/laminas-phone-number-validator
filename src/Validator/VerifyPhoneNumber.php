@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Settermjd\Validator;
+namespace Settermjd\LaminasPhoneNumberValidator\Validator;
 
 use Laminas\Validator\AbstractValidator;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
-use Settermjd\Exception\InvalidQueryParametersException;
-use Settermjd\InputFilter\QueryParametersInputFilter;
+use Settermjd\LaminasPhoneNumberValidator\Exception\InvalidQueryParametersException;
+use Settermjd\LaminasPhoneNumberValidator\InputFilter\QueryParametersInputFilter;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 

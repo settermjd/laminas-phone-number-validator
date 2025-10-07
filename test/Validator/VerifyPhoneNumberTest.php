@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SettermjdTest\Validator;
+namespace Settermjd\LaminasPhoneNumberValidatorTest\Validator;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\TestWith;
@@ -10,9 +10,9 @@ use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
-use Settermjd\Exception\InvalidQueryParametersException;
-use Settermjd\InputFilter\QueryParametersInputFilter;
-use Settermjd\Validator\VerifyPhoneNumber;
+use Settermjd\LaminasPhoneNumberValidator\Exception\InvalidQueryParametersException;
+use Settermjd\LaminasPhoneNumberValidator\InputFilter\QueryParametersInputFilter;
+use Settermjd\LaminasPhoneNumberValidator\Validator\VerifyPhoneNumber;
 use Twilio\Exceptions\TwilioException;
 use Twilio\Rest\Client;
 use Twilio\Rest\Lookups;

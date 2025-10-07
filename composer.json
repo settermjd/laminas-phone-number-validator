@@ -16,12 +16,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Settermjd\\": "src/"
+      "Settermjd\\LaminasPhoneNumberValidator\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SettermjdTest\\": "test/"
+      "Settermjd\\LaminasPhoneNumberValidatorTest\\": "test/"
     }
   },
   "config": {
