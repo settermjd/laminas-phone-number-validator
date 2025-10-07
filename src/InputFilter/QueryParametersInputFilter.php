@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Settermjd\InputFilter;
+namespace Settermjd\LaminasPhoneNumberValidator\InputFilter;
 
 use Laminas\Filter\AllowList;
 use Laminas\Filter\StringToUpper;
@@ -17,6 +17,15 @@ use Laminas\Validator\Regex;
 use Laminas\Validator\StringLength;
 
 /**
+ * QueryParametersInputFilter is a custom laminas-inputfilter object that provides complete input filtering and
+ * validation for query parameters that are passed to requests to Twilio's Lookup (V2) API.
+ *
+ * Using it ensures that only valid parameters with valid values can be used, and that anything else is
+ * filtered out.
+ *
+ * @see https://www.twilio.com/docs/lookup/v2-api#query-parameters-1
+ * @see https://docs.laminas.dev/laminas-inputfilter/v2/intro/
+ *
  * @extends InputFilter<QueryParametersInputFilter>
  */
 class QueryParametersInputFilter extends InputFilter
@@ -26,7 +35,7 @@ class QueryParametersInputFilter extends InputFilter
      *
      * @var array<int,string>
      */
-    public const array SUPPORTED_FIELDS = [
+    public const array SUPPORTED_FIELDS        = [
         'call_forwarding',
         'caller_name',
         'identity_match',
@@ -39,6 +48,8 @@ class QueryParametersInputFilter extends InputFilter
         'sms_pumping_risk',
         'validation',
     ];
+    public const string REGEX_VERIFICATION_SID = "/VA[0-9a-f]{32}/";
+    public const string TWILIO_DATE_FORMAT     = 'Ymd';
 
     public function __construct()
     {
@@ -97,7 +108,7 @@ class QueryParametersInputFilter extends InputFilter
         $dateOfBirth
             ->getValidatorChain()
             ->attach(new Date([
-                'format' => 'Ymd',
+                'format' => self::TWILIO_DATE_FORMAT,
                 'strict' => true,
             ]));
         $dateOfBirth
@@ -111,7 +122,7 @@ class QueryParametersInputFilter extends InputFilter
             ->getFilterChain()
             ->attach(new StripNewlines())
             ->attach(new StripTags())
-            ->attach(new \Settermjd\Filter\Explode([
+            ->attach(new \Settermjd\LaminasPhoneNumberValidator\Filter\Explode([
                 'filter' => new AllowList([
                     'list' => self::SUPPORTED_FIELDS,
                 ]),
@@ -147,7 +158,7 @@ class QueryParametersInputFilter extends InputFilter
         $lastVerificationDate
             ->getValidatorChain()
             ->attach(new Date([
-                'format' => 'Ymd',
+                'format' => self::TWILIO_DATE_FORMAT,
                 'strict' => true,
             ]));
 
@@ -181,7 +192,7 @@ class QueryParametersInputFilter extends InputFilter
                 'min' => 34,
                 'max' => 34,
             ]))
-            ->attach(new Regex("/VA[0-9a-f]{32}/"));
+            ->attach(new Regex(self::REGEX_VERIFICATION_SID));
         $verificationSid
             ->getFilterChain()
             ->attach(new StripNewlines())

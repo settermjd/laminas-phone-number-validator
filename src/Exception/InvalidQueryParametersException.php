@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Settermjd\Exception;
+namespace Settermjd\LaminasPhoneNumberValidator\Exception;
 
 use LogicException;
 use Throwable;

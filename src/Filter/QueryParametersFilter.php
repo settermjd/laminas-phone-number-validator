@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Settermjd\Filter;
+namespace Settermjd\LaminasPhoneNumberValidator\Filter;
 
 use Laminas\Filter\FilterInterface;
 

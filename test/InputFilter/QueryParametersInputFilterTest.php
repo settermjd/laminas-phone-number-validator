@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace SettermjdTest\InputFilter;
+namespace Settermjd\LaminasPhoneNumberValidatorTest\InputFilter;
 
 use PHPUnit\Framework\Attributes\TestWith;
 use PHPUnit\Framework\TestCase;
-use Settermjd\InputFilter\QueryParametersInputFilter;
+use Settermjd\LaminasPhoneNumberValidator\InputFilter\QueryParametersInputFilter;
 
 use function array_filter;
 use function var_export;

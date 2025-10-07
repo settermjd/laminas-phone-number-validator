@@ -38,6 +38,8 @@ composer require settermjd/laminas-twilio-phone-number-validator
 
 ### How to Use the Validator
 
+#### Direct Instantiation
+
 You can use it directly, as in the following example, to validate a phone number.
 
 ```php
@@ -58,6 +60,8 @@ if ($validator->isValid($email)) {
     }
 }
 ```
+
+#### Used with laminas-inputfilter
 
 Or, you can use it in conjunction with [laminas-inputfilter][laminas-inputfilter-url], as in the following example.
 
@@ -103,13 +107,21 @@ To retrieve these, open [the Twilio Console][twilio-console-url] in your browser
 > [!CAUTION]
 > Use a package such as [PHP Dotenv][phpdotenv-url] to keep credentials, such as the Twilio Account SID and Auth Token out of code, and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
 
-#### Supply query parameters
+#### Use in Mezzio Applications
 
-The previous example didn't supply any query parameters.
+If you use this package with [Mezzio applications][mezzio-docs-url], you don't need to do anything to instantiate or configure a `VerifyPhoneNumber` instance, as you do in the two previous examples.
+Rather, you can just retrieve a fully configured instance from the application's DI/Service container, such as in the example below.
+
+```php
+use Settermjd\LaminasPhoneNumberValidator\Validator\VerifyPhoneNumber;
+
+// Retrieve an instance from the container
+$container->get(VerifyPhoneNumber::class);
+```
+
+### Supply Query Parameters
+
 Query parameters allow you to retrieve additional data during the lookup, such as [when the SIM was last swapped](https://www.twilio.com/en-us/blog/how-to-detect-sim-swap-with-php-before-sending-sms-otp), and whether call forwarding is enabled.
-
-> [!CAUTION]
-> Be aware that some query parameters, such as in `Field`s require data packages which will incur charges on your account. Please double-check your code before running it so that you don't accidentally incur excessive unintended Lookup charges.
 
 To set them:
 
@@ -140,7 +152,10 @@ $validator = new VerifyPhoneNumber(
 
 The method supports either an array of [supported query parameters](https://www.twilio.com/docs/lookup/v2-api#query-parameters-1), or a `QueryParameter` object.
 
-##### Filter and validate query parameters
+> [!CAUTION]
+> Be aware that some query parameters, such as in `Field`s require data packages which will incur charges on your account. Please double-check your code before running it so that you don't accidentally incur excessive unintended Lookup charges.
+
+### Filter and validate query parameters
 
 To ensure that the query parameters provided to the validator are valid, you can use the `QueryParametersInputFilter`.
 This is a custom [laminas-inputfilter](https://docs.laminas.dev/laminas-inputfilter/intro/) class which ensures that the query parameter data provided is valid, and doesn't contain malicious information or values unsupported by the Lookup API.
@@ -179,7 +194,7 @@ In the example above, the query parameters (`$suppliedQueryParameters`) are chec
 If the data is valid, then the `VerifyPhoneNumber` validator is instantiated and used; that code is exactly the same as in the first example above.
 If one or more of the query parameters are not valid, then an exception will be thrown, containing information about which query parameter was not valid and why.
 
-#### Add Caching Support
+### Add Caching Support
 
 The validator is [PSR-16][psr16-url]-compliant.
 So, if you want to further enhance performance, when initialising a `VerifyPhoneNumber` object, provide an object that implements [CacheInterface][cacheinterface-url] as the third argument; the example below uses [laminas-cache][laminascache-psr16-url].
@@ -230,6 +245,7 @@ If the project was useful, and you want to say thank you and/or support its acti
 [github-pr-url]: https://github.com/settermjd/laminas-phone-number-validator/pulls
 [laminascache-psr16-url]: https://docs.laminas.dev/laminas-cache/v4/psr16/
 [laminas-inputfilter-url]: https://docs.laminas.dev/laminas-inputfilter/
+[mezzio-docs-url]: https://docs.mezzio.dev/mezzio/
 [phpdotenv-url]: https://github.com/vlucas/phpdotenv
 [psr16-url]: https://www.php-fig.org/psr/psr-16/
 [simplecache-implementation-url]: https://packagist.org/providers/psr/simple-cache-implementation
