@@ -38,6 +38,7 @@ class ConfigProvider
         return [
             'factories' => [
                 Client::class            => TwilioRestClientFactory::class,
+                VerifyPhoneNumber::class => VerifyPhoneNumberFactory::class,
             ],
         ];
     }
