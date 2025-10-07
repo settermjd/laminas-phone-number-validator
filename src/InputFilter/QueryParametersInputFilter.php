@@ -17,6 +17,15 @@ use Laminas\Validator\Regex;
 use Laminas\Validator\StringLength;
 
 /**
+ * QueryParametersInputFilter is a custom laminas-inputfilter object that provides complete input filtering and
+ * validation for query parameters that are passed to requests to Twilio's Lookup (V2) API.
+ *
+ * Using it ensures that only valid parameters with valid values can be used, and that anything else is
+ * filtered out.
+ *
+ * @see https://www.twilio.com/docs/lookup/v2-api#query-parameters-1
+ * @see https://docs.laminas.dev/laminas-inputfilter/v2/intro/
+ *
  * @extends InputFilter<QueryParametersInputFilter>
  */
 class QueryParametersInputFilter extends InputFilter

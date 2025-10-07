@@ -18,11 +18,22 @@ use function is_string;
 use function preg_match;
 use function sprintf;
 
+/**
+ * VerifyPhoneNumber is a custom laminas-validator class that checks if a phone number is valid by using
+ * a combination of Twilio's E.164 regular expression and Lookup (V2) API. This combination provides a
+ * simple way of validating phone numbers are valid.
+ */
 final class VerifyPhoneNumber extends AbstractValidator
 {
     public const string MSG_INVALID_PHONE_NUMBER   = 'msgInvalidPhoneNumber';
     public const string MSG_NETWORK_LOOKUP_FAILURE = 'msgNetworkLookupFailure';
-    public const string REGEX_E164                 = "/^\+[1-9]\d{1,14}$/";
+
+    /**
+     * This is Twilio's E.164 regular expression
+     *
+     * @see https://www.twilio.com/docs/glossary/what-e164#regex-matching-for-e164
+     */
+    public const string REGEX_E164 = "/^\+[1-9]\d{1,14}$/";
 
     /**
      * An array of one or more query parameters supported by Twilio's Lookup (V2) API
@@ -59,7 +70,6 @@ final class VerifyPhoneNumber extends AbstractValidator
      * It first checks the number against Twilio's E.164 regex, and if that passes,
      * it makes a request to Twilio's Lookup API (V2).
      *
-     * @link https://www.twilio.com/docs/glossary/what-e164
      * @link https://www.twilio.com/docs/lookup/v2-api
      *
      * @throws InvalidArgumentException
@@ -105,6 +115,8 @@ final class VerifyPhoneNumber extends AbstractValidator
     }
 
     /**
+     * setQueryParameters sets query parameters for requests to the Lookup (V2) API.
+     *
      * @param array<string,string> $queryParameters
      */
     public function setQueryParameters(array $queryParameters = []): void
@@ -124,6 +136,8 @@ final class VerifyPhoneNumber extends AbstractValidator
     }
 
     /**
+     * getQueryParameters returns the currently set query parameters for the Lookup (V2) API
+     *
      * @return array<string,string>
      */
     public function getQueryParameters(): array
