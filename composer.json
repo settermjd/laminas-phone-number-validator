@@ -1,71 +1,77 @@
 {
-  "name": "settermjd/laminas-twilio-phone-number-validator",
-  "description": "A laminas-validator class that validates phone numbers using Twilio's Verify API",
-  "license": "BSD-3-Clause",
-  "keywords": [
-    "laminas",
-    "validator",
-    "twilio",
-    "verify"
-  ],
-  "support": {
-    "docs": "https://github.com/laminas/laminas-validator/docs",
-    "issues": "https://github.com/laminas/laminas-validator/issues",
-    "source": "https://github.com/laminas/laminas-validator",
-    "rss": "https://github.com/laminas/laminas-validator/releases.atom"
-  },
-  "autoload": {
-    "psr-4": {
-      "Settermjd\\LaminasPhoneNumberValidator\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Settermjd\\LaminasPhoneNumberValidatorTest\\": "test/"
-    }
-  },
-  "config": {
-    "sort-packages": true,
-    "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
-    }
-  },
-  "scripts": {
-    "check": [
-      "@cs-check",
-      "@static-analysis",
-      "@test"
+    "name": "settermjd/laminas-twilio-phone-number-validator",
+    "description": "A laminas-validator class that validates phone numbers using Twilio's Verify API",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "laminas",
+        "validator",
+        "twilio",
+        "verify"
     ],
-    "cs-check": "phpcs",
-    "cs-fix": "phpcbf",
-    "docs-check": "markdownlint --config .markdownlint.yaml README.md",
-    "docs-fix": "markdownlint --fix --config .markdownlint.yaml README.md",
-    "test": "phpunit --colors=always",
-    "test-coverage": "XDEBUG_MODE=coverage phpunit --colors=always --coverage-clover clover.xml",
-    "static-analysis": "phpstan analyse --configuration phpstan.neon"
-  },
-  "require": {
-    "php": "~8.3.0 || ~8.4.0",
-    "laminas/laminas-coding-standard": "^3.0",
-    "laminas/laminas-inputfilter": "^2.31",
-    "laminas/laminas-validator": "^2.60.0",
-    "twilio/sdk": "^8.3",
-    "vlucas/phpdotenv": "^5.6"
-  },
-  "require-dev": {
-    "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "^10.5",
-    "psr/simple-cache": "^3.0",
-    "roave/security-advisories": "dev-latest",
-    "squizlabs/php_codesniffer": "^3.10"
-  },
-  "suggest": {
-    "cache/apcu-adapter": "A PSR-6 cache implementation using apcu, which supports tagging",
-    "cache/filesystem-adapter": "A PSR-6 cache implementation using filesystem, which supports tagging.",
-    "cache/memcached-adapter": "A PSR-6 cache implementation using Memcached, which supports tagging.",
-    "cache/redis-adapter": "A PSR-6 cache implementation using Redis (PhpRedis), which supports tagging.",
-    "illuminate/cache": "The Illuminate Cache package.",
-    "laminas/laminas-cache": "A caching implementation with a variety of storage options, as well as codified caching strategies for callbacks, classes, and output",
-    "symfony/cache": "Symfony's cache component"
-  }
+    "support": {
+        "docs": "https://github.com/laminas/laminas-validator/docs",
+        "issues": "https://github.com/laminas/laminas-validator/issues",
+        "source": "https://github.com/laminas/laminas-validator",
+        "rss": "https://github.com/laminas/laminas-validator/releases.atom"
+    },
+    "autoload": {
+        "psr-4": {
+            "Settermjd\\LaminasPhoneNumberValidator\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Settermjd\\LaminasPhoneNumberValidatorTest\\": "test/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "check": [
+            "@cs-check",
+            "@static-analysis",
+            "@test"
+        ],
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf",
+        "docs-check": "markdownlint --config .markdownlint.yaml README.md",
+        "docs-fix": "markdownlint --fix --config .markdownlint.yaml README.md",
+        "test": "phpunit --colors=always",
+        "test-coverage": "XDEBUG_MODE=coverage phpunit --colors=always --coverage-clover clover.xml",
+        "static-analysis": "phpstan analyse --memory-limit=256M --configuration phpstan.neon"
+    },
+    "require": {
+        "php": "~8.3.0 || ~8.4.0",
+        "laminas/laminas-coding-standard": "^3.0",
+        "laminas/laminas-inputfilter": "^2.31",
+        "laminas/laminas-validator": "^2.60.0",
+        "twilio/sdk": "^8.3",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "require-dev": {
+        "fakerphp/faker": "^1.24.1",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^10.5",
+        "psr/simple-cache": "^3.0",
+        "roave/security-advisories": "dev-latest",
+        "squizlabs/php_codesniffer": "^3.10"
+    },
+    "suggest": {
+        "cache/apcu-adapter": "A PSR-6 cache implementation using apcu, which supports tagging",
+        "cache/filesystem-adapter": "A PSR-6 cache implementation using filesystem, which supports tagging.",
+        "cache/memcached-adapter": "A PSR-6 cache implementation using Memcached, which supports tagging.",
+        "cache/redis-adapter": "A PSR-6 cache implementation using Redis (PhpRedis), which supports tagging.",
+        "illuminate/cache": "The Illuminate Cache package.",
+        "laminas/laminas-cache": "A caching implementation with a variety of storage options, as well as codified caching strategies for callbacks, classes, and output",
+        "symfony/cache": "Symfony's cache component"
+    },
+    "extra": {
+        "laminas": {
+            "config-provider": "Settermjd\\LaminasPhoneNumberValidator\\ConfigProvider"
+        }
+    }
 }
