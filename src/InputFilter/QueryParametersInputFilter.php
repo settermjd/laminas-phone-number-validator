@@ -35,7 +35,7 @@ class QueryParametersInputFilter extends InputFilter
      *
      * @var array<int,string>
      */
-    public const array SUPPORTED_FIELDS = [
+    public const array SUPPORTED_FIELDS        = [
         'call_forwarding',
         'caller_name',
         'identity_match',
@@ -48,6 +48,8 @@ class QueryParametersInputFilter extends InputFilter
         'sms_pumping_risk',
         'validation',
     ];
+    public const string REGEX_VERIFICATION_SID = "/VA[0-9a-f]{32}/";
+    public const string TWILIO_DATE_FORMAT     = 'Ymd';
 
     public function __construct()
     {
@@ -106,7 +108,7 @@ class QueryParametersInputFilter extends InputFilter
         $dateOfBirth
             ->getValidatorChain()
             ->attach(new Date([
-                'format' => 'Ymd',
+                'format' => self::TWILIO_DATE_FORMAT,
                 'strict' => true,
             ]));
         $dateOfBirth
@@ -156,7 +158,7 @@ class QueryParametersInputFilter extends InputFilter
         $lastVerificationDate
             ->getValidatorChain()
             ->attach(new Date([
-                'format' => 'Ymd',
+                'format' => self::TWILIO_DATE_FORMAT,
                 'strict' => true,
             ]));
 
@@ -190,7 +192,7 @@ class QueryParametersInputFilter extends InputFilter
                 'min' => 34,
                 'max' => 34,
             ]))
-            ->attach(new Regex("/VA[0-9a-f]{32}/"));
+            ->attach(new Regex(self::REGEX_VERIFICATION_SID));
         $verificationSid
             ->getFilterChain()
             ->attach(new StripNewlines())
