@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Settermjd\LaminasPhoneNumberValidator;
 
 use Settermjd\LaminasPhoneNumberValidator\Factory\TwilioRestClientFactory;
+use Settermjd\LaminasPhoneNumberValidator\Filter\QueryParametersFilter;
 use Settermjd\LaminasPhoneNumberValidator\Validator\VerifyPhoneNumber;
 use Settermjd\LaminasPhoneNumberValidator\Validator\VerifyPhoneNumberFactory;
 use Twilio\Rest\Client;
@@ -36,9 +37,12 @@ class ConfigProvider
     public function getDependencies(): array
     {
         return [
-            'factories' => [
+            'factories'  => [
                 Client::class            => TwilioRestClientFactory::class,
                 VerifyPhoneNumber::class => VerifyPhoneNumberFactory::class,
+            ],
+            'invokables' => [
+                QueryParametersFilter::class => QueryParametersFilter::class,
             ],
         ];
     }
