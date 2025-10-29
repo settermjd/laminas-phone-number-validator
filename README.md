@@ -22,7 +22,7 @@ To use the application, you'll need the following:
 
 ### Add the Package as a Project Dependency
 
-To use the package in your project, first, either add it in _composer.json_'s `require` attribute, as in the example below.
+To use the package in your project, first, either add it in the project's _composer.json_'s `require` attribute, as in the example below.
 
 ```json
 "require": {
@@ -30,7 +30,7 @@ To use the package in your project, first, either add it in _composer.json_'s `r
 }
 ```
 
-Or, use `composer require` to add it:
+Alternatively, use `composer require` to add it:
 
 ```bash
 composer require settermjd/laminas-twilio-phone-number-validator
@@ -107,16 +107,62 @@ To retrieve these, open [the Twilio Console][twilio-console-url] in your browser
 > [!CAUTION]
 > Use a package such as [PHP Dotenv][phpdotenv-url] to keep credentials, such as the Twilio Account SID and Auth Token out of code, and avoid them accidentally being tracked by Git (or your version control tool of choice), or your deployment tool's secrets manager is strongly encouraged.
 
-#### Use in Mezzio Applications
+#### In a Mezzio Project
 
 If you use this package with [Mezzio applications][mezzio-docs-url], you don't need to do anything to instantiate or configure a `VerifyPhoneNumber` instance, as you do in the two previous examples.
-Rather, you can just retrieve a fully configured instance from the application's DI/Service container, such as in the example below.
+You only need to, first, retrieve the validator from the DI container, such as in a factory class that instantiates a handler, as in the example below.
 
 ```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Handler;
+
+use Mezzio\Template\TemplateRendererInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use Settermjd\LaminasPhoneNumberValidator\Validator\VerifyPhoneNumber;
 
-// Retrieve an instance from the container
-$container->get(VerifyPhoneNumber::class);
+use function assert;
+
+final class HomePageHandlerFactory
+{
+    public function __invoke(ContainerInterface $container): HomePageHandler
+    {
+        return new HomePageHandler(
+            $container->get(VerifyPhoneNumber::class)
+        );
+    }
+}
+```
+
+Then, call the validator's `isValid()` method, to check if the phone number is valid, as in the example below.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Handler;
+
+use Psr\Container\ContainerInterface;
+use Settermjd\LaminasPhoneNumberValidator\Validator\VerifyPhoneNumber;
+
+final class HomePageHandler implements RequestHandlerInterface
+{
+    public function __invoke(VerifyPhoneNumber $validator): HomePageHandler
+    {
+        if ($validator->isValid($email)) {
+            // The phone number is valid...
+        } else {
+            // The phone number is not valid. Display the reasons why
+            foreach ($validator->getMessages() as $messageId => $message) {
+                printf("Validation failure '%s': %s\n", $messageId, $message);
+            }
+        }
+    }
+}
 ```
 
 ### Supply Query Parameters
@@ -214,7 +260,7 @@ $storageFactory = $container->get(StorageAdapterFactoryInterface::class);
 $storage = $storageFactory->create('apc');
 
 $validator = new VerifyPhoneNumber(
-    new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`), 
+    new Client(`<YOUR_TWILIO_ACCOUNT_SID>`, `<YOUR_TWILIO_AUTH_TOKEN>`),
     new QueryParametersFilter(),
     cache: new SimpleCacheDecorator($storage),
 );
